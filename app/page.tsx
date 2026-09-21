@@ -360,42 +360,35 @@ export default function Home() {
     );
   }
 
-  // AUTHENTICATED SCREEN (After Login)
- return (
-  <div>
-    <div
-      style={{
-        background: "#14181D",
-        color: "white",
-        padding: "10px 20px",
-        display: "flex",
-        justifyContent: "flex-end",
-        gap: "15px",
-        alignItems: "center",
-        fontFamily: "sans-serif"
-      }}
-    >
-      <span style={{ fontSize: "14px" }}>
-        {user.displayName}
-      </span>
+ // AUTHENTICATED SCREEN (After Login)
+  return (
+    <div style={{ minHeight: '100vh', backgroundColor: '#050706', fontFamily: 'system-ui', color: 'white' }}>
+      
+      {/* Top Navbar */}
+      <div style={{ backgroundColor: '#0a0d0b', borderBottom: '1px solid #1a231d', padding: '16px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <img src="/logo.jpg" alt="Logo" style={{ width: '32px', height: '32px', borderRadius: '50%' }} />
+          <span style={{ fontWeight: 'bold', letterSpacing: '1px' }}>REGIME DESK</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <span style={{ fontSize: '14px', color: '#8f9a93' }}>{user.displayName}</span>
+          <button 
+            onClick={() => signOut(auth)} 
+            style={{ backgroundColor: 'transparent', color: '#fca5a5', border: '1px solid #451a1a', padding: '6px 14px', borderRadius: '8px', cursor: 'pointer', fontSize: '13px' }}
+          >
+            Logout
+          </button>
+        </div>
+      </div>
+      
+      {/* YAHAN AAPKA ASLI PURANA APP RENDER HOGA */}
+      <div style={{ width: "100%" }}>
+        <RegimeDeskApp />
+      </div>
 
-      <button
-        onClick={() => signOut(auth)}
-        style={{
-          padding: "6px 12px",
-          cursor: "pointer",
-          background: "transparent",
-          color: "white",
-          border: "1px solid white"
-        }}
-      >
-        Logout
-      </button>
     </div>
-
-    <RegimeDeskApp />
-  </div>
-);
+  );
+}
 // ============================================================
 // अपना पुराना REGIME DESK का कोड यहाँ नीचे पेस्ट करें
 // ============================================================
