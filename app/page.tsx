@@ -8,7 +8,7 @@ import { doc, getDoc, setDoc, deleteDoc, collection, getDocs } from "firebase/fi
 
 export default function Home() {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [authTimedOut, setAuthTimedOut] = useState(false);
   const [authError, setAuthError] = useState("");
 
