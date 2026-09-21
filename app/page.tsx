@@ -3041,7 +3041,7 @@ function RegimeDeskApp() {
     }
   }, /*#__PURE__*/React.createElement("div", {
     className: "eyebrow"
-  }, "Regime desk · ", date), /*#__PURE__*/React.createElement("div", {
+  }, "TRACK. ANALYZE. IMPROVE. REPEAT. · ", date), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       gap: 2
