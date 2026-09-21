@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
 ```tsx
+```tsx
 'use client';
 
 import React, { useState, useEffect } from "react";
@@ -11,6 +12,7 @@ import {
   signOut,
   onAuthStateChanged,
 } from "firebase/auth";
+
 import {
   doc,
   getDoc,
@@ -20,6 +22,13 @@ import {
   getDocs,
 } from "firebase/firestore";
 
+// IMPORTANT:
+// Replace this import with the component/file that already contains
+// your existing webpage/dashboard.
+//
+// Example:
+// import TradingJournal from "./TradingJournal";
+
 export default function Home() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -28,11 +37,17 @@ export default function Home() {
   const [loggingIn, setLoggingIn] = useState(false);
 
   useEffect(() => {
-    const timeoutId = setTimeout(() => setAuthTimedOut(true), 2500);
+    const timeoutId = setTimeout(() => {
+      setAuthTimedOut(true);
+    }, 2500);
 
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       setAuthTimedOut(false);
+
+      // ---------------------------------------------
+      // YOUR EXISTING FIRESTORE STORAGE SYSTEM
+      // ---------------------------------------------
 
       if (currentUser) {
         (window as any).storage = {
@@ -44,6 +59,7 @@ export default function Home() {
               "trades",
               key
             );
+
             const docSnap = await getDoc(docRef);
 
             if (!docSnap.exists()) {
@@ -131,6 +147,10 @@ export default function Home() {
     };
   }, []);
 
+  // ---------------------------------------------
+  // GOOGLE LOGIN
+  // ---------------------------------------------
+
   const handleLogin = async () => {
     try {
       setAuthError("");
@@ -139,13 +159,16 @@ export default function Home() {
       const provider = new GoogleAuthProvider();
 
       await signInWithPopup(auth, provider);
+
     } catch (error: any) {
       console.error(error);
 
-      if (error?.code === "auth/popup-closed-by-user") {
+      if (error?.code === "auth/popup-blocked") {
+        setAuthError(
+          "Popup blocked. Please allow popups for this website."
+        );
+      } else if (error?.code === "auth/popup-closed-by-user") {
         setAuthError("Login window was closed.");
-      } else if (error?.code === "auth/popup-blocked") {
-        setAuthError("Popup blocked. Please allow popups for this website.");
       } else {
         setAuthError("Unable to sign in. Please try again.");
       }
@@ -154,690 +177,312 @@ export default function Home() {
     }
   };
 
-  /* ---------------------------------------------------------
-     GLOBAL STYLES
-  --------------------------------------------------------- */
-
-  const styles = {
-    page: {
-      minHeight: "100vh",
-      background:
-        "radial-gradient(circle at 15% 20%, rgba(34,197,94,0.12), transparent 30%), radial-gradient(circle at 85% 80%, rgba(16,185,129,0.08), transparent 30%), #050706",
-      color: "#fff",
-      fontFamily:
-        "Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif",
-      position: "relative" as const,
-      overflow: "hidden" as const,
-    },
-
-    grid: {
-      position: "absolute" as const,
-      inset: 0,
-      backgroundImage:
-        "linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px)",
-      backgroundSize: "50px 50px",
-      maskImage:
-        "linear-gradient(to bottom, black 0%, transparent 90%)",
-      pointerEvents: "none" as const,
-    },
-
-    glow: {
-      position: "absolute" as const,
-      width: "500px",
-      height: "500px",
-      borderRadius: "50%",
-      background:
-        "radial-gradient(circle, rgba(34,197,94,0.12), transparent 68%)",
-      filter: "blur(20px)",
-      pointerEvents: "none" as const,
-    },
-
-    loginWrapper: {
-      minHeight: "100vh",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      padding: "24px",
-      position: "relative" as const,
-      zIndex: 2,
-    },
-
-    loginCard: {
-      width: "100%",
-      maxWidth: "470px",
-      padding: "46px 40px",
-      borderRadius: "28px",
-      background:
-        "linear-gradient(145deg, rgba(255,255,255,0.075), rgba(255,255,255,0.025))",
-      border: "1px solid rgba(255,255,255,0.10)",
-      boxShadow:
-        "0 30px 100px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.06)",
-      backdropFilter: "blur(25px)",
-      WebkitBackdropFilter: "blur(25px)",
-      textAlign: "center" as const,
-    },
-
-    logoBox: {
-      width: "108px",
-      height: "108px",
-      margin: "0 auto 28px",
-      borderRadius: "30px",
-      padding: "4px",
-      background:
-        "linear-gradient(135deg, #4ade80, #16a34a, #052e16)",
-      boxShadow:
-        "0 0 45px rgba(34,197,94,0.22), 0 15px 40px rgba(0,0,0,0.45)",
-    },
-
-    logoInner: {
-      width: "100%",
-      height: "100%",
-      borderRadius: "26px",
-      overflow: "hidden",
-      background: "#020402",
-    },
-
-    logo: {
-      width: "100%",
-      height: "100%",
-      objectFit: "cover" as const,
-      transform: "scale(1.12)",
-    },
-
-    eyebrow: {
-      display: "inline-flex",
-      alignItems: "center",
-      gap: "8px",
-      padding: "7px 12px",
-      borderRadius: "999px",
-      background: "rgba(34,197,94,0.08)",
-      border: "1px solid rgba(74,222,128,0.18)",
-      color: "#86efac",
-      fontSize: "11px",
-      fontWeight: 800,
-      letterSpacing: "1.8px",
-      textTransform: "uppercase" as const,
-      marginBottom: "18px",
-    },
-
-    dot: {
-      width: "7px",
-      height: "7px",
-      borderRadius: "50%",
-      background: "#4ade80",
-      boxShadow: "0 0 12px #4ade80",
-    },
-
-    title: {
-      fontSize: "clamp(29px, 7vw, 39px)",
-      lineHeight: 1.05,
-      fontWeight: 900,
-      letterSpacing: "-1.8px",
-      margin: 0,
-    },
-
-    green: {
-      color: "#4ade80",
-    },
-
-    subtitle: {
-      marginTop: "16px",
-      color: "#8f9a93",
-      fontSize: "14px",
-      lineHeight: 1.7,
-      maxWidth: "340px",
-      marginLeft: "auto",
-      marginRight: "auto",
-    },
-
-    divider: {
-      height: "1px",
-      background:
-        "linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent)",
-      margin: "30px 0",
-    },
-
-    loginButton: {
-      width: "100%",
-      height: "56px",
-      borderRadius: "15px",
-      border: "1px solid rgba(255,255,255,0.14)",
-      background: "#ffffff",
-      color: "#111111",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      gap: "12px",
-      fontSize: "15px",
-      fontWeight: 750,
-      cursor: loggingIn ? "wait" : "pointer",
-      transition: "all 0.25s ease",
-      boxShadow: "0 12px 30px rgba(0,0,0,0.28)",
-      opacity: loggingIn ? 0.7 : 1,
-    },
-
-    security: {
-      marginTop: "20px",
-      color: "#626c65",
-      fontSize: "11px",
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      gap: "7px",
-    },
-
-    nav: {
-      height: "76px",
-      padding: "0 28px",
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "center",
-      borderBottom: "1px solid rgba(255,255,255,0.07)",
-      background: "rgba(5,7,6,0.72)",
-      backdropFilter: "blur(20px)",
-      WebkitBackdropFilter: "blur(20px)",
-      position: "relative" as const,
-      zIndex: 10,
-    },
-
-    brand: {
-      display: "flex",
-      alignItems: "center",
-      gap: "12px",
-    },
-
-    navLogo: {
-      width: "40px",
-      height: "40px",
-      borderRadius: "12px",
-      objectFit: "cover" as const,
-      border: "1px solid rgba(255,255,255,0.1)",
-    },
-
-    brandText: {
-      fontWeight: 850,
-      fontSize: "15px",
-      letterSpacing: "1px",
-    },
-
-    liveBadge: {
-      display: "flex",
-      alignItems: "center",
-      gap: "7px",
-      color: "#86efac",
-      fontSize: "10px",
-      fontWeight: 800,
-      letterSpacing: "1.3px",
-      textTransform: "uppercase" as const,
-    },
-
-    liveDot: {
-      width: "6px",
-      height: "6px",
-      borderRadius: "50%",
-      background: "#4ade80",
-      boxShadow: "0 0 10px #4ade80",
-    },
-
-    userArea: {
-      display: "flex",
-      alignItems: "center",
-      gap: "14px",
-    },
-
-    userName: {
-      color: "#9ca3a8",
-      fontSize: "13px",
-    },
-
-    logout: {
-      border: "1px solid rgba(255,255,255,0.10)",
-      background: "rgba(255,255,255,0.04)",
-      color: "#e5e7eb",
-      padding: "9px 15px",
-      borderRadius: "10px",
-      cursor: "pointer",
-      fontWeight: 650,
-      fontSize: "12px",
-    },
-
-    dashboard: {
-      maxWidth: "1250px",
-      margin: "0 auto",
-      padding: "70px 28px",
-      position: "relative" as const,
-      zIndex: 2,
-    },
-
-    dashboardHero: {
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "flex-end",
-      gap: "30px",
-      marginBottom: "38px",
-    },
-
-    heroLabel: {
-      color: "#4ade80",
-      fontSize: "11px",
-      fontWeight: 800,
-      letterSpacing: "2px",
-      textTransform: "uppercase" as const,
-      marginBottom: "12px",
-    },
-
-    heroTitle: {
-      margin: 0,
-      fontSize: "clamp(34px, 6vw, 58px)",
-      lineHeight: 1,
-      letterSpacing: "-2.5px",
-      fontWeight: 900,
-    },
-
-    heroDescription: {
-      marginTop: "16px",
-      color: "#737c76",
-      maxWidth: "600px",
-      lineHeight: 1.7,
-      fontSize: "14px",
-    },
-
-    cards: {
-      display: "grid",
-      gridTemplateColumns: "repeat(auto-fit, minmax(230px, 1fr))",
-      gap: "18px",
-    },
-
-    card: {
-      padding: "25px",
-      minHeight: "150px",
-      borderRadius: "20px",
-      border: "1px solid rgba(255,255,255,0.07)",
-      background:
-        "linear-gradient(145deg, rgba(255,255,255,0.055), rgba(255,255,255,0.018))",
-      boxShadow: "0 20px 50px rgba(0,0,0,0.18)",
-      backdropFilter: "blur(15px)",
-    },
-
-    cardIcon: {
-      width: "40px",
-      height: "40px",
-      borderRadius: "12px",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      background: "rgba(34,197,94,0.08)",
-      color: "#4ade80",
-      marginBottom: "20px",
-    },
-
-    cardTitle: {
-      fontSize: "15px",
-      fontWeight: 800,
-      marginBottom: "8px",
-    },
-
-    cardText: {
-      color: "#6f7872",
-      fontSize: "12px",
-      lineHeight: 1.6,
-    },
-  };
-
-  /* ---------------------------------------------------------
-     LOADING
-  --------------------------------------------------------- */
+  // ---------------------------------------------
+  // LOADING
+  // ---------------------------------------------
 
   if (loading && !authTimedOut) {
     return (
-      <div style={styles.page}>
-        <div style={styles.grid} />
+      <div
+        style={{
+          minHeight: "100vh",
+          background: "#050706",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          color: "#4ade80",
+          fontFamily: "system-ui",
+        }}
+      >
+        Loading...
+      </div>
+    );
+  }
 
-        <div style={styles.loginWrapper}>
+  // ---------------------------------------------
+  // LOGIN SCREEN ONLY
+  // ---------------------------------------------
+
+  if (!user) {
+    return (
+      <div
+        style={{
+          minHeight: "100vh",
+          background:
+            "radial-gradient(circle at 20% 20%, rgba(34,197,94,.13), transparent 30%), radial-gradient(circle at 80% 80%, rgba(16,185,129,.10), transparent 30%), #050706",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "24px",
+          fontFamily:
+            "Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif",
+          position: "relative",
+          overflow: "hidden",
+        }}
+      >
+
+        {/* Background Grid */}
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            backgroundImage:
+              "linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px)",
+            backgroundSize: "50px 50px",
+            maskImage:
+              "linear-gradient(to bottom, black, transparent)",
+          }}
+        />
+
+        {/* Login Card */}
+        <div
+          style={{
+            width: "100%",
+            maxWidth: "470px",
+            padding: "46px 40px",
+            borderRadius: "28px",
+            background:
+              "linear-gradient(145deg, rgba(255,255,255,.075), rgba(255,255,255,.025))",
+            border: "1px solid rgba(255,255,255,.10)",
+            boxShadow:
+              "0 30px 100px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.06)",
+            backdropFilter: "blur(25px)",
+            WebkitBackdropFilter: "blur(25px)",
+            textAlign: "center",
+            position: "relative",
+            zIndex: 2,
+          }}
+        >
+
+          {/* Logo */}
           <div
             style={{
-              textAlign: "center",
-              color: "#6f7872",
+              width: "108px",
+              height: "108px",
+              margin: "0 auto 28px",
+              borderRadius: "30px",
+              padding: "4px",
+              background:
+                "linear-gradient(135deg, #4ade80, #16a34a, #052e16)",
+              boxShadow:
+                "0 0 45px rgba(34,197,94,.22), 0 15px 40px rgba(0,0,0,.45)",
             }}
           >
             <div
               style={{
-                width: "34px",
-                height: "34px",
+                width: "100%",
+                height: "100%",
+                borderRadius: "26px",
+                overflow: "hidden",
+                background: "#020402",
+              }}
+            >
+              <img
+                src="/logo.jpg"
+                alt="Green Candle Club"
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  transform: "scale(1.12)",
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Badge */}
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "8px",
+              padding: "7px 12px",
+              borderRadius: "999px",
+              background: "rgba(34,197,94,.08)",
+              border:
+                "1px solid rgba(74,222,128,.18)",
+              color: "#86efac",
+              fontSize: "11px",
+              fontWeight: 800,
+              letterSpacing: "1.8px",
+              textTransform: "uppercase",
+              marginBottom: "18px",
+            }}
+          >
+            <span
+              style={{
+                width: "7px",
+                height: "7px",
                 borderRadius: "50%",
-                border: "2px solid rgba(255,255,255,0.08)",
-                borderTopColor: "#4ade80",
-                margin: "0 auto 16px",
-                animation: "spin 0.8s linear infinite",
+                background: "#4ade80",
+                boxShadow: "0 0 12px #4ade80",
               }}
             />
 
-            <div style={{ fontSize: "13px" }}>
-              Initializing Regime Desk...
-            </div>
+            Trading Intelligence
           </div>
-        </div>
 
-        <style jsx>{`
-          @keyframes spin {
-            to {
-              transform: rotate(360deg);
-            }
-          }
-        `}</style>
-      </div>
-    );
-  }
-
-  /* ---------------------------------------------------------
-     LOGIN SCREEN
-  --------------------------------------------------------- */
-
-  if (!user) {
-    return (
-      <div style={styles.page}>
-        <div style={styles.grid} />
-
-        <div
-          style={{
-            ...styles.glow,
-            top: "-220px",
-            left: "-180px",
-          }}
-        />
-
-        <div
-          style={{
-            ...styles.glow,
-            bottom: "-250px",
-            right: "-180px",
-          }}
-        />
-
-        <div style={styles.loginWrapper}>
-          <div style={styles.loginCard}>
-            <div style={styles.logoBox}>
-              <div style={styles.logoInner}>
-                <img
-                  src="/logo.jpg"
-                  alt="Green Candle Club"
-                  style={styles.logo}
-                />
-              </div>
-            </div>
-
-            <div style={styles.eyebrow}>
-              <span style={styles.dot} />
-              Trading Intelligence
-            </div>
-
-            <h1 style={styles.title}>
-              GREEN CANDLE{" "}
-              <span style={styles.green}>
-                CLUB
-              </span>
-            </h1>
-
-            <p style={styles.subtitle}>
-              Market Regime Scorecard & Trading Journal
-              built for disciplined decision-making.
-            </p>
-
-            <div style={styles.divider} />
-
-            {authError && (
-              <div
-                style={{
-                  marginBottom: "16px",
-                  padding: "11px 13px",
-                  borderRadius: "10px",
-                  background: "rgba(248,113,113,0.08)",
-                  border: "1px solid rgba(248,113,113,0.16)",
-                  color: "#fca5a5",
-                  fontSize: "12px",
-                }}
-              >
-                {authError}
-              </div>
-            )}
-
-            <button
-              onClick={handleLogin}
-              disabled={loggingIn}
-              style={styles.loginButton}
-              onMouseEnter={(e) => {
-                if (!loggingIn) {
-                  e.currentTarget.style.transform =
-                    "translateY(-2px)";
-                  e.currentTarget.style.boxShadow =
-                    "0 16px 35px rgba(0,0,0,0.38)";
-                }
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform =
-                  "translateY(0)";
-                e.currentTarget.style.boxShadow =
-                  "0 12px 30px rgba(0,0,0,0.28)";
-              }}
-            >
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  fill="#4285F4"
-                  d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                />
-                <path
-                  fill="#34A853"
-                  d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                />
-                <path
-                  fill="#FBBC05"
-                  d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
-                />
-                <path
-                  fill="#EA4335"
-                  d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
-                />
-              </svg>
-
-              {loggingIn
-                ? "Connecting..."
-                : "Continue with Google"}
-            </button>
-
-            <div style={styles.security}>
-              <span>🔒</span>
-              Secure Google authentication
-              <span>•</span>
-              Private trading data
-            </div>
-          </div>
-        </div>
-
-        <div
-          style={{
-            position: "absolute",
-            bottom: "18px",
-            left: 0,
-            right: 0,
-            textAlign: "center",
-            color: "#3f4742",
-            fontSize: "10px",
-            letterSpacing: "1px",
-            textTransform: "uppercase",
-          }}
-        >
-          Green Candle Club · Regime Desk
-        </div>
-      </div>
-    );
-  }
-
-  /* ---------------------------------------------------------
-     AUTHENTICATED DASHBOARD
-  --------------------------------------------------------- */
-
-  return (
-    <div style={styles.page}>
-      <div style={styles.grid} />
-
-      <div
-        style={{
-          ...styles.glow,
-          top: "-250px",
-          right: "-200px",
-        }}
-      />
-
-      <nav style={styles.nav}>
-        <div style={styles.brand}>
-          <img
-            src="/logo.jpg"
-            alt="Green Candle Club"
-            style={styles.navLogo}
-          />
-
-          <div>
-            <div style={styles.brandText}>
-              REGIME DESK
-            </div>
-
-            <div style={styles.liveBadge}>
-              <span style={styles.liveDot} />
-              System Online
-            </div>
-          </div>
-        </div>
-
-        <div style={styles.userArea}>
-          <span style={styles.userName}>
-            {user.displayName || user.email}
-          </span>
-
-          <button
-            onClick={() => signOut(auth)}
-            style={styles.logout}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background =
-                "rgba(255,255,255,0.08)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background =
-                "rgba(255,255,255,0.04)";
+          {/* Title */}
+          <h1
+            style={{
+              fontSize: "clamp(29px, 7vw, 39px)",
+              lineHeight: 1.05,
+              fontWeight: 900,
+              letterSpacing: "-1.8px",
+              margin: 0,
+              color: "#fff",
             }}
           >
-            Logout
+            GREEN CANDLE{" "}
+            <span style={{ color: "#4ade80" }}>
+              CLUB
+            </span>
+          </h1>
+
+          <p
+            style={{
+              marginTop: "16px",
+              color: "#8f9a93",
+              fontSize: "14px",
+              lineHeight: 1.7,
+            }}
+          >
+            Market Regime Scorecard & Trading Journal
+          </p>
+
+          {/* Divider */}
+          <div
+            style={{
+              height: "1px",
+              background:
+                "linear-gradient(90deg, transparent, rgba(255,255,255,.12), transparent)",
+              margin: "30px 0",
+            }}
+          />
+
+          {/* Error */}
+          {authError && (
+            <div
+              style={{
+                marginBottom: "16px",
+                padding: "11px 13px",
+                borderRadius: "10px",
+                background: "rgba(248,113,113,.08)",
+                border:
+                  "1px solid rgba(248,113,113,.16)",
+                color: "#fca5a5",
+                fontSize: "12px",
+              }}
+            >
+              {authError}
+            </div>
+          )}
+
+          {/* Google Login */}
+          <button
+            onClick={handleLogin}
+            disabled={loggingIn}
+            style={{
+              width: "100%",
+              height: "56px",
+              borderRadius: "15px",
+              border:
+                "1px solid rgba(255,255,255,.14)",
+              background: "#fff",
+              color: "#111",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "12px",
+              fontSize: "15px",
+              fontWeight: 750,
+              cursor: loggingIn ? "wait" : "pointer",
+              boxShadow:
+                "0 12px 30px rgba(0,0,0,.28)",
+              opacity: loggingIn ? 0.7 : 1,
+              transition: "all .25s ease",
+            }}
+            onMouseEnter={(e) => {
+              if (!loggingIn) {
+                e.currentTarget.style.transform =
+                  "translateY(-2px)";
+              }
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform =
+                "translateY(0)";
+            }}
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+            >
+              <path
+                fill="#4285F4"
+                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+              />
+              <path
+                fill="#34A853"
+                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+              />
+              <path
+                fill="#FBBC05"
+                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+              />
+              <path
+                fill="#EA4335"
+                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+              />
+            </svg>
+
+            {loggingIn
+              ? "Connecting..."
+              : "Continue with Google"}
           </button>
+
+          <div
+            style={{
+              marginTop: "20px",
+              color: "#626c65",
+              fontSize: "11px",
+            }}
+          >
+            🔒 Secure Google authentication
+          </div>
+
         </div>
-      </nav>
+      </div>
+    );
+  }
 
-      <main style={styles.dashboard}>
-        <section style={styles.dashboardHero}>
-          <div>
-            <div style={styles.heroLabel}>
-              Market Intelligence Platform
-            </div>
+  // ============================================================
+  // IMPORTANT:
+  // DO NOT CREATE A NEW DASHBOARD HERE.
+  //
+  // AFTER LOGIN, RETURN YOUR EXISTING WEBPAGE COMPONENT.
+  // ============================================================
 
-            <h1 style={styles.heroTitle}>
-              Welcome back
-              <br />
-              <span style={styles.green}>
-                {user.displayName?.split(" ")[0] || "Trader"}.
-              </span>
-            </h1>
+  return (
+    <>
+      {/* 
+        YOUR EXISTING PAGE GOES HERE.
 
-            <p style={styles.heroDescription}>
-              Your centralized workspace for market regime
-              analysis, trade tracking and disciplined
-              decision-making.
-            </p>
-          </div>
-        </section>
+        Example:
 
-        <section style={styles.cards}>
-          <div style={styles.card}>
-            <div style={styles.cardIcon}>
-              📊
-            </div>
+        <TradingJournal user={user} />
 
-            <div style={styles.cardTitle}>
-              Market Regime
-            </div>
+        OR, if your existing application is already inside
+        this same file, paste its ORIGINAL return JSX here.
 
-            <div style={styles.cardText}>
-              Evaluate current market conditions and identify
-              whether the environment supports your trading
-              strategy.
-            </div>
-          </div>
+        Do NOT use the dashboard I previously created.
+      */}
 
-          <div style={styles.card}>
-            <div style={styles.cardIcon}>
-              📈
-            </div>
-
-            <div style={styles.cardTitle}>
-              Trading Journal
-            </div>
-
-            <div style={styles.cardText}>
-              Maintain your trade records and build a
-              data-driven understanding of your execution.
-            </div>
-          </div>
-
-          <div style={styles.card}>
-            <div style={styles.cardIcon}>
-              🎯
-            </div>
-
-            <div style={styles.cardTitle}>
-              Strategy Discipline
-            </div>
-
-            <div style={styles.cardText}>
-              Keep your trading process structured and
-              focused instead of reacting emotionally to
-              short-term market movements.
-            </div>
-          </div>
-
-          <div style={styles.card}>
-            <div style={styles.cardIcon}>
-              ⚡
-            </div>
-
-            <div style={styles.cardTitle}>
-              Quick Insights
-            </div>
-
-            <div style={styles.cardText}>
-              Access your most important trading information
-              from a single, clean workspace.
-            </div>
-          </div>
-        </section>
-      </main>
-
-      <style jsx>{`
-        @media (max-width: 650px) {
-          nav {
-            padding: 0 16px !important;
-          }
-
-          .desktopUser {
-            display: none;
-          }
-        }
-      `}</style>
-    </div>
+      <TradingJournal user={user} />
+    </>
   );
 }
 ```
-
 // ============================================================
 // अपना पुराना REGIME DESK का कोड यहाँ नीचे पेस्ट करें
 // ============================================================
