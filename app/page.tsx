@@ -136,19 +136,12 @@ export default function Home() {
         </div>
       </div>
       
-      {/* Yahan aapke app ka baaki hissa aayega */}
       <div className="p-6 text-white text-center mt-10">
         <h2 className="text-xl text-neutral-400">Welcome to your Trading Dashboard</h2>
       </div>
     </div>
   );
 }
-      {/* नीचे दिया गया आपका पुराना ऐप यहाँ रेंडर होगा */}
-      <RegimeDeskApp />
-    </div>
-  );
-}
-
 // ============================================================
 // अपना पुराना REGIME DESK का कोड यहाँ नीचे पेस्ट करें
 // ============================================================
