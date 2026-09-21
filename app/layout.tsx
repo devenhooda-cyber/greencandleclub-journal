@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Regime Desk",
+  title: "Green Candle CLub",
   description: "Market regime scorecard and trade edge analyser.",
 };
 
