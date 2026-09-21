@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Green Candle CLub",
+  title: "Green Candle Club",
   description: "Market regime scorecard and trade edge analyser.",
 };
 
