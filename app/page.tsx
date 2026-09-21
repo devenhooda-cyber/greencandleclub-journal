@@ -18,7 +18,6 @@ export default function Home() {
       setUser(currentUser);
       setAuthTimedOut(false);
       
-      // User login hone par window.storage ko Firebase Firestore se connect karna
       if (currentUser) {
         (window as any).storage = {
           async get(key: string) {
@@ -57,54 +56,58 @@ export default function Home() {
     };
   }, []);
 
+  // STYLES OBJECT (Yeh 100% kaam karega bina kisi configuration ke)
+  const styles = {
+    container: { minHeight: '100vh', backgroundColor: '#0a0a0a', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', fontFamily: 'system-ui, -apple-system, sans-serif' },
+    card: { width: '100%', maxWidth: '420px', backgroundColor: '#171717', border: '1px solid #262626', borderRadius: '24px', padding: '40px 32px', textAlign: 'center' as const, boxShadow: '0 20px 40px rgba(0,0,0,0.5), 0 0 40px rgba(0, 255, 0, 0.05)' },
+    logoContainer: { width: '110px', height: '110px', margin: '0 auto 24px', borderRadius: '50%', backgroundColor: '#000', border: '2px solid #262626', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', boxShadow: '0 0 25px rgba(0, 255, 0, 0.2)' },
+    logo: { width: '100%', height: '100%', objectFit: 'cover' as const, transform: 'scale(1.15)' },
+    title: { fontSize: '26px', fontWeight: 900, color: '#ffffff', margin: '0 0 8px 0', letterSpacing: '0.5px' },
+    greenText: { color: '#4ade80' },
+    subtitle: { fontSize: '13px', color: '#a3a3a3', textTransform: 'uppercase' as const, letterSpacing: '2px', fontWeight: 600, margin: 0 },
+    divider: { height: '1px', backgroundColor: '#262626', margin: '32px 0' },
+    button: { width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', backgroundColor: '#ffffff', color: '#171717', border: 'none', borderRadius: '12px', padding: '14px 20px', fontSize: '16px', fontWeight: 600, cursor: 'pointer', transition: '0.2s', boxShadow: '0 4px 12px rgba(255,255,255,0.1)' },
+    nav: { backgroundColor: '#171717', borderBottom: '1px solid #262626', padding: '16px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontFamily: 'system-ui' },
+    navTitle: { color: 'white', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '12px' },
+    navLogo: { width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover' as const },
+    logoutBtn: { backgroundColor: 'transparent', color: 'white', border: '1px solid #404040', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer' }
+  };
+
   if (loading && !authTimedOut) {
-    return (
-      <div className="min-h-screen bg-neutral-950 flex items-center justify-center text-white font-sans">
-        Loading Trading Journal...
-      </div>
-    );
+    return <div style={{...styles.container, color: 'white'}}>Loading Trading Journal...</div>;
   }
 
-  // LOGIN SCREEN (New Design)
+  // LOGIN SCREEN
   if (!user) {
     return (
-      <div className="min-h-screen bg-neutral-950 flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-neutral-900 border border-neutral-800 rounded-2xl p-8 text-center shadow-2xl shadow-green-950/20">
+      <div style={styles.container}>
+        <div style={styles.card}>
           
-          <div className="mb-6">
-            <div className="w-24 h-24 mx-auto mb-4 rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(0,255,0,0.2)] overflow-hidden bg-black border border-neutral-800">
-              <img 
-                src="/logo.jpg" 
-                alt="Green Candle Club" 
-                className="w-full h-full object-cover scale-110"
-              />
-            </div>
-            <h1 className="text-2xl font-black tracking-wide text-white">
-              GREEN CANDLE <span className="text-green-400">CLUB</span>
-            </h1>
-            <p className="text-xs text-neutral-400 mt-1 uppercase tracking-widest font-medium">
-              Market Regime Scorecard
-            </p>
+          <div style={styles.logoContainer}>
+            <img src="/logo.jpg" alt="Green Candle Club" style={styles.logo} />
           </div>
+          
+          <h1 style={styles.title}>
+            GREEN CANDLE <span style={styles.greenText}>CLUB</span>
+          </h1>
+          <p style={styles.subtitle}>Market Regime Scorecard</p>
 
-          <div className="h-px bg-neutral-800 my-6"></div>
+          <div style={styles.divider}></div>
 
-          {authError && (
-            <p className="text-red-400 text-sm mb-4 bg-red-950/30 p-2 rounded-lg border border-red-900/50">
-              {authError}
-            </p>
-          )}
+          {authError && <p style={{color: '#f87171', fontSize: '14px', marginBottom: '16px'}}>{authError}</p>}
 
           <button 
             onClick={() => {
               setAuthError("");
               signInWithPopup(auth, new GoogleAuthProvider()).catch(() => {
-                setAuthError("Login was blocked. Allow popups for this site and try again.");
+                setAuthError("Login blocked. Allow popups.");
               });
             }}
-            className="w-full flex items-center justify-center gap-3 bg-white hover:bg-neutral-100 text-neutral-900 font-semibold py-3 px-4 rounded-xl transition-all duration-200 shadow-md active:scale-[0.98]"
+            style={styles.button}
+            onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f5f5f5'}
+            onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#ffffff'}
           >
-            <svg className="w-5 h-5" viewBox="0 0 24 24">
+            <svg width="24" height="24" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
               <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
               <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
@@ -119,25 +122,20 @@ export default function Home() {
 
   // AUTHENTICATED SCREEN (Inside Regime Desk)
   return (
-    <div className="min-h-screen bg-neutral-950 font-sans">
-      <div className="bg-neutral-900 border-b border-neutral-800 text-white p-4 flex justify-between items-center">
-        <div className="flex items-center gap-3">
-          <img src="/logo.jpg" alt="Logo" className="w-8 h-8 rounded-full" />
-          <span className="font-bold tracking-wide">REGIME DESK</span>
+    <div style={{minHeight: '100vh', backgroundColor: '#0a0a0a', fontFamily: 'system-ui'}}>
+      <div style={styles.nav}>
+        <div style={styles.navTitle}>
+          <img src="/logo.jpg" alt="Logo" style={styles.navLogo} />
+          <span>REGIME DESK</span>
         </div>
-        <div className="flex items-center gap-4">
-          <span className="text-sm text-neutral-400">{user.displayName}</span>
-          <button 
-            onClick={() => signOut(auth)} 
-            className="px-4 py-2 text-sm bg-neutral-800 hover:bg-neutral-700 text-white rounded-lg transition-colors border border-neutral-700"
-          >
-            Logout
-          </button>
+        <div style={{display: 'flex', alignItems: 'center', gap: '16px'}}>
+          <span style={{color: '#a3a3a3', fontSize: '14px'}}>{user.displayName}</span>
+          <button onClick={() => signOut(auth)} style={styles.logoutBtn}>Logout</button>
         </div>
       </div>
       
-      <div className="p-6 text-white text-center mt-10">
-        <h2 className="text-xl text-neutral-400">Welcome to your Trading Dashboard</h2>
+      <div style={{padding: '40px 20px', textAlign: 'center', color: 'white'}}>
+        <h2 style={{color: '#a3a3a3', fontWeight: 'normal'}}>Welcome to your Trading Dashboard</h2>
       </div>
     </div>
   );
