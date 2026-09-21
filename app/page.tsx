@@ -3,486 +3,145 @@
 ```tsx
 ```tsx
 'use client';
-
 import React, { useState, useEffect } from "react";
 import { auth, db } from "../firebase";
-import {
-  signInWithPopup,
-  GoogleAuthProvider,
-  signOut,
-  onAuthStateChanged,
-} from "firebase/auth";
-
-import {
-  doc,
-  getDoc,
-  setDoc,
-  deleteDoc,
-  collection,
-  getDocs,
-} from "firebase/firestore";
-
-// IMPORTANT:
-// Replace this import with the component/file that already contains
-// your existing webpage/dashboard.
-//
-// Example:
-// import TradingJournal from "./TradingJournal";
+import { signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "firebase/auth";
+import { doc, getDoc, setDoc, deleteDoc, collection, getDocs } from "firebase/firestore";
 
 export default function Home() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [authTimedOut, setAuthTimedOut] = useState(false);
   const [authError, setAuthError] = useState("");
-  const [loggingIn, setLoggingIn] = useState(false);
 
   useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      setAuthTimedOut(true);
-    }, 2500);
-
+    const timeoutId = setTimeout(() => setAuthTimedOut(true), 2500);
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       setAuthTimedOut(false);
-
-      // ---------------------------------------------
-      // YOUR EXISTING FIRESTORE STORAGE SYSTEM
-      // ---------------------------------------------
-
+      
       if (currentUser) {
         (window as any).storage = {
           async get(key: string) {
-            const docRef = doc(
-              db,
-              "users",
-              currentUser.uid,
-              "trades",
-              key
-            );
-
+            const docRef = doc(db, "users", currentUser.uid, "trades", key);
             const docSnap = await getDoc(docRef);
-
-            if (!docSnap.exists()) {
-              throw new Error("not found");
-            }
-
-            return {
-              key,
-              value: docSnap.data().value,
-              shared: false,
-            };
+            if (!docSnap.exists()) throw new Error("not found");
+            return { key, value: docSnap.data().value, shared: false };
           },
-
           async set(key: string, value: any) {
-            const docRef = doc(
-              db,
-              "users",
-              currentUser.uid,
-              "trades",
-              key
-            );
-
+            const docRef = doc(db, "users", currentUser.uid, "trades", key);
             await setDoc(docRef, { value });
-
-            return {
-              key,
-              value,
-              shared: false,
-            };
+            return { key, value, shared: false };
           },
-
           async delete(key: string) {
-            const docRef = doc(
-              db,
-              "users",
-              currentUser.uid,
-              "trades",
-              key
-            );
-
+            const docRef = doc(db, "users", currentUser.uid, "trades", key);
             await deleteDoc(docRef);
-
-            return {
-              key,
-              deleted: true,
-              shared: false,
-            };
+            return { key, deleted: true, shared: false };
           },
-
           async list(prefix = "") {
             const keys: string[] = [];
-
-            const colRef = collection(
-              db,
-              "users",
-              currentUser.uid,
-              "trades"
-            );
-
+            const colRef = collection(db, "users", currentUser.uid, "trades");
             const querySnapshot = await getDocs(colRef);
-
-            querySnapshot.forEach((tradeDoc) => {
-              const k = tradeDoc.id;
-
-              if (k.startsWith(prefix)) {
-                keys.push(k);
-              }
+            querySnapshot.forEach((doc) => {
+              const k = doc.id;
+              if (k.startsWith(prefix)) keys.push(k);
             });
-
-            return {
-              keys,
-              prefix,
-              shared: false,
-            };
-          },
+            return { keys, prefix, shared: false };
+          }
         };
       }
-
       setLoading(false);
     });
-
     return () => {
       clearTimeout(timeoutId);
       unsubscribe();
     };
   }, []);
 
-  // ---------------------------------------------
-  // GOOGLE LOGIN
-  // ---------------------------------------------
-
-  const handleLogin = async () => {
-    try {
-      setAuthError("");
-      setLoggingIn(true);
-
-      const provider = new GoogleAuthProvider();
-
-      await signInWithPopup(auth, provider);
-
-    } catch (error: any) {
-      console.error(error);
-
-      if (error?.code === "auth/popup-blocked") {
-        setAuthError(
-          "Popup blocked. Please allow popups for this website."
-        );
-      } else if (error?.code === "auth/popup-closed-by-user") {
-        setAuthError("Login window was closed.");
-      } else {
-        setAuthError("Unable to sign in. Please try again.");
-      }
-    } finally {
-      setLoggingIn(false);
-    }
+  // STYLES OBJECT (Yeh 100% kaam karega bina kisi configuration ke)
+  const styles = {
+    container: { minHeight: '100vh', backgroundColor: '#0a0a0a', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', fontFamily: 'system-ui, -apple-system, sans-serif' },
+    card: { width: '100%', maxWidth: '420px', backgroundColor: '#171717', border: '1px solid #262626', borderRadius: '24px', padding: '40px 32px', textAlign: 'center' as const, boxShadow: '0 20px 40px rgba(0,0,0,0.5), 0 0 40px rgba(0, 255, 0, 0.05)' },
+    logoContainer: { width: '110px', height: '110px', margin: '0 auto 24px', borderRadius: '50%', backgroundColor: '#000', border: '2px solid #262626', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', boxShadow: '0 0 25px rgba(0, 255, 0, 0.2)' },
+    logo: { width: '100%', height: '100%', objectFit: 'cover' as const, transform: 'scale(1.15)' },
+    title: { fontSize: '26px', fontWeight: 900, color: '#ffffff', margin: '0 0 8px 0', letterSpacing: '0.5px' },
+    greenText: { color: '#4ade80' },
+    subtitle: { fontSize: '13px', color: '#a3a3a3', textTransform: 'uppercase' as const, letterSpacing: '2px', fontWeight: 600, margin: 0 },
+    divider: { height: '1px', backgroundColor: '#262626', margin: '32px 0' },
+    button: { width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', backgroundColor: '#ffffff', color: '#171717', border: 'none', borderRadius: '12px', padding: '14px 20px', fontSize: '16px', fontWeight: 600, cursor: 'pointer', transition: '0.2s', boxShadow: '0 4px 12px rgba(255,255,255,0.1)' },
+    nav: { backgroundColor: '#171717', borderBottom: '1px solid #262626', padding: '16px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontFamily: 'system-ui' },
+    navTitle: { color: 'white', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '12px' },
+    navLogo: { width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover' as const },
+    logoutBtn: { backgroundColor: 'transparent', color: 'white', border: '1px solid #404040', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer' }
   };
 
-  // ---------------------------------------------
-  // LOADING
-  // ---------------------------------------------
-
   if (loading && !authTimedOut) {
-    return (
-      <div
-        style={{
-          minHeight: "100vh",
-          background: "#050706",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          color: "#4ade80",
-          fontFamily: "system-ui",
-        }}
-      >
-        Loading...
-      </div>
-    );
+    return <div style={{...styles.container, color: 'white'}}>Loading Trading Journal...</div>;
   }
 
-  // ---------------------------------------------
-  // LOGIN SCREEN ONLY
-  // ---------------------------------------------
-
+  // LOGIN SCREEN
   if (!user) {
     return (
-      <div
-        style={{
-          minHeight: "100vh",
-          background:
-            "radial-gradient(circle at 20% 20%, rgba(34,197,94,.13), transparent 30%), radial-gradient(circle at 80% 80%, rgba(16,185,129,.10), transparent 30%), #050706",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          padding: "24px",
-          fontFamily:
-            "Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif",
-          position: "relative",
-          overflow: "hidden",
-        }}
-      >
-
-        {/* Background Grid */}
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            backgroundImage:
-              "linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px)",
-            backgroundSize: "50px 50px",
-            maskImage:
-              "linear-gradient(to bottom, black, transparent)",
-          }}
-        />
-
-        {/* Login Card */}
-        <div
-          style={{
-            width: "100%",
-            maxWidth: "470px",
-            padding: "46px 40px",
-            borderRadius: "28px",
-            background:
-              "linear-gradient(145deg, rgba(255,255,255,.075), rgba(255,255,255,.025))",
-            border: "1px solid rgba(255,255,255,.10)",
-            boxShadow:
-              "0 30px 100px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.06)",
-            backdropFilter: "blur(25px)",
-            WebkitBackdropFilter: "blur(25px)",
-            textAlign: "center",
-            position: "relative",
-            zIndex: 2,
-          }}
-        >
-
-          {/* Logo */}
-          <div
-            style={{
-              width: "108px",
-              height: "108px",
-              margin: "0 auto 28px",
-              borderRadius: "30px",
-              padding: "4px",
-              background:
-                "linear-gradient(135deg, #4ade80, #16a34a, #052e16)",
-              boxShadow:
-                "0 0 45px rgba(34,197,94,.22), 0 15px 40px rgba(0,0,0,.45)",
-            }}
-          >
-            <div
-              style={{
-                width: "100%",
-                height: "100%",
-                borderRadius: "26px",
-                overflow: "hidden",
-                background: "#020402",
-              }}
-            >
-              <img
-                src="/logo.jpg"
-                alt="Green Candle Club"
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "cover",
-                  transform: "scale(1.12)",
-                }}
-              />
-            </div>
+      <div style={styles.container}>
+        <div style={styles.card}>
+          
+          <div style={styles.logoContainer}>
+            <img src="/logo.jpg" alt="Green Candle Club" style={styles.logo} />
           </div>
-
-          {/* Badge */}
-          <div
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "8px",
-              padding: "7px 12px",
-              borderRadius: "999px",
-              background: "rgba(34,197,94,.08)",
-              border:
-                "1px solid rgba(74,222,128,.18)",
-              color: "#86efac",
-              fontSize: "11px",
-              fontWeight: 800,
-              letterSpacing: "1.8px",
-              textTransform: "uppercase",
-              marginBottom: "18px",
-            }}
-          >
-            <span
-              style={{
-                width: "7px",
-                height: "7px",
-                borderRadius: "50%",
-                background: "#4ade80",
-                boxShadow: "0 0 12px #4ade80",
-              }}
-            />
-
-            Trading Intelligence
-          </div>
-
-          {/* Title */}
-          <h1
-            style={{
-              fontSize: "clamp(29px, 7vw, 39px)",
-              lineHeight: 1.05,
-              fontWeight: 900,
-              letterSpacing: "-1.8px",
-              margin: 0,
-              color: "#fff",
-            }}
-          >
-            GREEN CANDLE{" "}
-            <span style={{ color: "#4ade80" }}>
-              CLUB
-            </span>
+          
+          <h1 style={styles.title}>
+            GREEN CANDLE <span style={styles.greenText}>CLUB</span>
           </h1>
+          <p style={styles.subtitle}>Market Regime Scorecard</p>
 
-          <p
-            style={{
-              marginTop: "16px",
-              color: "#8f9a93",
-              fontSize: "14px",
-              lineHeight: 1.7,
+          <div style={styles.divider}></div>
+
+          {authError && <p style={{color: '#f87171', fontSize: '14px', marginBottom: '16px'}}>{authError}</p>}
+
+          <button 
+            onClick={() => {
+              setAuthError("");
+              signInWithPopup(auth, new GoogleAuthProvider()).catch(() => {
+                setAuthError("Login blocked. Allow popups.");
+              });
             }}
+            style={styles.button}
+            onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f5f5f5'}
+            onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#ffffff'}
           >
-            Market Regime Scorecard & Trading Journal
-          </p>
-
-          {/* Divider */}
-          <div
-            style={{
-              height: "1px",
-              background:
-                "linear-gradient(90deg, transparent, rgba(255,255,255,.12), transparent)",
-              margin: "30px 0",
-            }}
-          />
-
-          {/* Error */}
-          {authError && (
-            <div
-              style={{
-                marginBottom: "16px",
-                padding: "11px 13px",
-                borderRadius: "10px",
-                background: "rgba(248,113,113,.08)",
-                border:
-                  "1px solid rgba(248,113,113,.16)",
-                color: "#fca5a5",
-                fontSize: "12px",
-              }}
-            >
-              {authError}
-            </div>
-          )}
-
-          {/* Google Login */}
-          <button
-            onClick={handleLogin}
-            disabled={loggingIn}
-            style={{
-              width: "100%",
-              height: "56px",
-              borderRadius: "15px",
-              border:
-                "1px solid rgba(255,255,255,.14)",
-              background: "#fff",
-              color: "#111",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "12px",
-              fontSize: "15px",
-              fontWeight: 750,
-              cursor: loggingIn ? "wait" : "pointer",
-              boxShadow:
-                "0 12px 30px rgba(0,0,0,.28)",
-              opacity: loggingIn ? 0.7 : 1,
-              transition: "all .25s ease",
-            }}
-            onMouseEnter={(e) => {
-              if (!loggingIn) {
-                e.currentTarget.style.transform =
-                  "translateY(-2px)";
-              }
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform =
-                "translateY(0)";
-            }}
-          >
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-            >
-              <path
-                fill="#4285F4"
-                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-              />
-              <path
-                fill="#34A853"
-                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-              />
-              <path
-                fill="#FBBC05"
-                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
-              />
-              <path
-                fill="#EA4335"
-                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
-              />
+            <svg width="24" height="24" viewBox="0 0 24 24">
+              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
             </svg>
-
-            {loggingIn
-              ? "Connecting..."
-              : "Continue with Google"}
+            Continue with Google
           </button>
-
-          <div
-            style={{
-              marginTop: "20px",
-              color: "#626c65",
-              fontSize: "11px",
-            }}
-          >
-            🔒 Secure Google authentication
-          </div>
-
         </div>
       </div>
     );
   }
 
-  // ============================================================
-  // IMPORTANT:
-  // DO NOT CREATE A NEW DASHBOARD HERE.
-  //
-  // AFTER LOGIN, RETURN YOUR EXISTING WEBPAGE COMPONENT.
-  // ============================================================
-
+  // AUTHENTICATED SCREEN (Inside Regime Desk)
   return (
-    <>
-      {/* 
-        YOUR EXISTING PAGE GOES HERE.
-
-        Example:
-
-        <TradingJournal user={user} />
-
-        OR, if your existing application is already inside
-        this same file, paste its ORIGINAL return JSX here.
-
-        Do NOT use the dashboard I previously created.
-      */}
-
-      <TradingJournal user={user} />
-    </>
+    <div style={{minHeight: '100vh', backgroundColor: '#0a0a0a', fontFamily: 'system-ui'}}>
+      <div style={styles.nav}>
+        <div style={styles.navTitle}>
+          <img src="/logo.jpg" alt="Logo" style={styles.navLogo} />
+          <span>REGIME DESK</span>
+        </div>
+        <div style={{display: 'flex', alignItems: 'center', gap: '16px'}}>
+          <span style={{color: '#a3a3a3', fontSize: '14px'}}>{user.displayName}</span>
+          <button onClick={() => signOut(auth)} style={styles.logoutBtn}>Logout</button>
+        </div>
+      </div>
+      
+      <div style={{padding: '40px 20px', textAlign: 'center', color: 'white'}}>
+        <h2 style={{color: '#a3a3a3', fontWeight: 'normal'}}>Welcome to your Trading Dashboard</h2>
+      </div>
+    </div>
   );
 }
-```
 // ============================================================
 // अपना पुराना REGIME DESK का कोड यहाँ नीचे पेस्ट करें
 // ============================================================
